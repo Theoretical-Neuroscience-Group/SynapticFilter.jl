@@ -54,9 +54,9 @@ function _filter_update!(μ, Σ::AbstractArray{T, 3}, τ, σs, g0, β, x, y, dt)
 
     # temporary array for storing the Σ * x for each block
     V = zeros(blocksize, numblocks)
-    u = 0
+    u = 0.
 
-    for i in 1:numblocks
+    @inbounds for i in 1:numblocks
         μ1 = view(μ, (i-1)*blocksize+1:i*blocksize) 
         Σ1 = view(Σ, :, :, i)
         
@@ -68,7 +68,7 @@ function _filter_update!(μ, Σ::AbstractArray{T, 3}, τ, σs, g0, β, x, y, dt)
         u += β * dot(μ1, x1) + dot(v, v) / 2
     end
 
-    for i in 1:numblocks
+    @inbounds for i in 1:numblocks
         μ1 = view(μ, (i-1)*blocksize+1:i*blocksize) 
         Σ1 = view(Σ, :, :, i)
 

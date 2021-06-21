@@ -1,5 +1,5 @@
 using SynapticFilter
-using Test
+using BenchmarkTools, Test
 
 @testset "SynapticFilter.jl" begin
     include("filters.jl")

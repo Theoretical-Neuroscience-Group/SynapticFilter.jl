@@ -94,4 +94,93 @@
             end 
         end
     end
+
+    @testset "Benchmark FullSF" begin
+        using SynapticFilter: _filter_update!
+
+        dim = 1024
+        μ  = rand(dim)
+        Σ  = rand(dim, dim)
+        x  = rand(dim)
+        y  = 1
+        g0 = 0.1
+        β  = 0.01
+        τ  = 1.
+        σs = 1.
+        dt = 1e-3
+
+        println("")
+        println("Benchmarking one filter update step for FullSF")
+        display(@benchmark _filter_update!($μ, $Σ, $τ, $σs, $g0, $β, $x, $y, $dt))
+        println("")
+        println("")
+    end
+
+    @testset "Benchmark BlockSF" begin
+        using SynapticFilter: _filter_update!
+
+        dim = 1024
+        numblocks = 128
+        blocksize = 8
+        μ  = rand(dim)
+        Σ  = rand(blocksize, blocksize, numblocks)
+        x  = rand(dim)
+        y  = 1
+        g0 = 0.1
+        β  = 0.01
+        τ  = 1.
+        σs = 1.
+        dt = 1e-3
+
+        println("")
+        println("Benchmarking one filter update step for BlockSF")
+        display(@benchmark _filter_update!($μ, $Σ, $τ, $σs, $g0, $β, $x, $y, $dt))
+        println("")
+        println("")
+    end
+
+    @testset "Benchmark DiagSF" begin
+        using SynapticFilter: _filter_update!
+
+        dim = 1024
+        μ  = rand(dim)
+        Σ  = rand(dim)
+        x  = rand(dim)
+        y  = 1
+        g0 = 0.1
+        β  = 0.01
+        τ  = 1.
+        σs = 1.
+        dt = 1e-3
+
+        println("")
+        println("Benchmarking one filter update step for DiagSF")
+        display(@benchmark _filter_update!($μ, $Σ, $τ, $σs, $g0, $β, $x, $y, $dt))
+        println("")
+        println("")
+    end
+
+    @testset "Benchmark FullSF" begin
+        using SynapticFilter: _filter_update!
+        using CUDA
+
+        dim = 1024
+        μ  = CUDA.rand(dim)
+        Σ  = CUDA.rand(dim, dim)
+        x  = CUDA.rand(dim)
+        y  = 1
+        g0 = 0.1f0
+        β  = 0.01f0
+        τ  = 1f0
+        σs = 1f0
+        dt = 1f-3
+
+        println("")
+        println("Benchmarking one filter update step for FullSF on GPU")
+        display(
+            @benchmark CUDA.@sync _filter_update!($μ, $Σ, $τ, $σs, $g0, $β, $x, $y, $dt)
+        )
+        println("")
+        println("")
+    end
 end
