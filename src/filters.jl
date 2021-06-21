@@ -25,7 +25,7 @@ struct FullSF{T1, T2} <: SF
     NModel::T2
 end
 
-function update!(state, filter::SF, obs, dt)
+function update!(state::FilterState, filter::SF, obs::NeuronObs, dt)
     SModel = filter.SModel
     NModel = filter.NModel
 
@@ -99,7 +99,7 @@ function _filter_update!(μ, Σ::AbstractMatrix, τ, σs, g0, β, x, y, dt)
     α2 = 2*α
     v = β * Σ * x
     u = β * dot(μ, x)
-    γ = g0 * dt * exp(u + 1/2 * dot(v, v))
+    γ = g0 * dt * exp(u + dot(v, v)/2)
     
     μ .+= -μ .* α .+ v .* (y - γ)
     Σ .-= γ .* v * transpose(v) .+ (Σ .- σs) .* α2
