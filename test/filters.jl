@@ -164,23 +164,25 @@
         using SynapticFilter: _filter_update!
         using CUDA
 
-        dim = 1024
-        μ  = CUDA.rand(dim)
-        Σ  = CUDA.rand(dim, dim)
-        x  = CUDA.rand(dim)
-        y  = 1
-        g0 = 0.1f0
-        β  = 0.01f0
-        τ  = 1f0
-        σs = 1f0
-        dt = 1f-3
+        if CUDA.functional()
+            dim = 1024
+            μ  = CUDA.rand(dim)
+            Σ  = CUDA.rand(dim, dim)
+            x  = CUDA.rand(dim)
+            y  = 1
+            g0 = 0.1f0
+            β  = 0.01f0
+            τ  = 1f0
+            σs = 1f0
+            dt = 1f-3
 
-        println("")
-        println("Benchmarking one filter update step for FullSF on GPU")
-        display(
-            @benchmark CUDA.@sync _filter_update!($μ, $Σ, $τ, $σs, $g0, $β, $x, $y, $dt)
-        )
-        println("")
-        println("")
+            println("")
+            println("Benchmarking one filter update step for FullSF on GPU")
+            display(
+                @benchmark CUDA.@sync _filter_update!($μ, $Σ, $τ, $σs, $g0, $β, $x, $y, $dt)
+            )
+            println("")
+            println("")
+        end
     end
 end
