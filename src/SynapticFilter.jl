@@ -1,5 +1,11 @@
 module SynapticFilter
 
-# Write your package code here.
+# using ...
 
-end
+include("filters.jl")
+export BlockSF, DiagSF, FullSF
+
+include("models.jl")
+export NeuronModel, OUModel
+
+end#module
