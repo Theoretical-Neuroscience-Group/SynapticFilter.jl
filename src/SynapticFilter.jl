@@ -1,11 +1,15 @@
 module SynapticFilter
 
-# using ...
-
-include("filters.jl")
-export BlockSF, DiagSF, FullSF
+using LinearAlgebra: dot
 
 include("models.jl")
-export NeuronModel, OUModel
+export 
+    NeuronModel, NeuronObs, OUModel,
+    update!
+
+include("filters.jl")
+export 
+    FilterState,
+    BlockSF, DiagSF, FullSF
 
 end#module
