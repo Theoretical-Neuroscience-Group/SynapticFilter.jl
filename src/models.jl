@@ -5,29 +5,32 @@ abstract type InputModel end
 update!(x, model::InputModel, dt, t) = update!(x, model, dt)
 
 struct PoissonExpModel{T1, T2} <: InputModel
-    ρ::T1 # input firing rate
-    τm::T2 # membrane time constant
+    ρ::T1    # input firing rate
+    τm::T2   # membrane time constant
     dim::Int # dimensionality
 end
+
+# Poisson count convolved with exponential kernel
+poisson_update(x, αm, λ) = x * exp(-αm) + rand(Poisson(λ))
 
 function update!(x::AbstractArray, model::PoissonExpModel, dt)
     αm = dt / model.τm
     λ = dt * model.ρ
 
     for i in eachindex(x)
-        # Poisson counts convolved with exponential kernel
-        @inbounds x[i] = x[i] * exp(-αm) + rand(Poisson(λ))
+        @inbounds x[i] = poisson_update(x[i], αm, λ)
     end
     
     return x
 end
 
+# input neurons are active in equal-sized blocks
 struct BlockPoissonExpModel{T1, T2, T3} <: InputModel
-    ρ::T1 # input firing rate
-    τm::T2 # membrane time constant
-    numblocks::Int
-    blocksize::Int
-    τblock::T3
+    ρ::T1           # input firing rate
+    τm::T2          # membrane time constant
+    numblocks::Int  # number of blocks
+    blocksize::Int  # size of blocks
+    τblock::T3      # duration of activation of a single block
 end
 
 function update!(x::AbstractArray, model::BlockPoissonExpModel, dt, t)
@@ -41,8 +44,7 @@ function update!(x::AbstractArray, model::BlockPoissonExpModel, dt, t)
     istart = block_id * model.blocksize + 1
     istop  = (block_id + 1) * model.blocksize
     for i in istart:istop
-        # Poisson counts convolved with exponential kernel
-        @inbounds x[i] = x[i] * exp(-αm) + rand(Poisson(λ))
+        @inbounds x[i] = poisson_update(x[i], αm, λ)
     end
     
     return x
