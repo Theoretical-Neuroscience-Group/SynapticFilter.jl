@@ -5,6 +5,7 @@ abstract type InputModel end
 update!(x, model::InputModel, dt, t) = update!(x, model, dt)
 
 struct PoissonExpModel{T1, T2} <: InputModel
+    dim::Int # dimensionality
     ρ::T1 # input firing rate
     τm::T2 # membrane time constant
 end
