@@ -45,7 +45,7 @@ struct State{T1, T2, T3}
     η::T3 # adaptation state
 end
 
-State(w, x) = State(w, x, Float64[])
+State(w, x) = State(w, x, [0.])
 
 update!(state::State, model::InputModel, dt) = update!(state.x, model, dt)
 update!(state::State, model::SynapseModel, dt) = update!(state.w, model, dt)
