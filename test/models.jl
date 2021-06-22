@@ -2,7 +2,7 @@
     @testset "PoissonExpModel" begin
         @testset "Zero firing rate, zero time constant" begin
             x = ones(10)
-            model = PoissonExpModel(0, 0)
+            model = PoissonExpModel(0, 0, 10)
             update!(x, model, 0.01)
 
             @test all(x .== 0)
@@ -10,7 +10,7 @@
 
         @testset "Zero firing rate, infinite time constant" begin
             x = ones(10)
-            model = PoissonExpModel(0, Inf)
+            model = PoissonExpModel(0, Inf, 10)
             update!(x, model, 0.01)
 
             @test all(x .== 1)
@@ -18,7 +18,7 @@
 
         @testset "Zero firing rate, unit time constant" begin
             x = ones(10)
-            model = PoissonExpModel(0, 1)
+            model = PoissonExpModel(0, 1, 10)
             update!(x, model, 0.01)
 
             @test all(x .== exp(-0.01))
@@ -26,7 +26,7 @@
 
         @testset "Unit firing rate, infinite time constant" begin
             x = ones(10)
-            model = PoissonExpModel(1, Inf)
+            model = PoissonExpModel(1, Inf, 10)
             update!(x, model, 1.)
 
             @test all(x .>= 1)
@@ -72,7 +72,7 @@
         x = ones(10)
         state = State(w, x)
 
-        Imodel = PoissonExpModel(1, 0.1)
+        Imodel = PoissonExpModel(1, 0.1, 10)
         Smodel = OUModel(1, 1)
 
         wcopy = copy(w)
@@ -164,7 +164,7 @@
         w = rand(1024)
         x = rand(1024)
         state = State(w, x)
-        model = PoissonExpModel(1, 0.1)
+        model = PoissonExpModel(1, 0.1, 10)
 
         println("")
         println("Benchmarking one update step for PoissonExpModel")
