@@ -79,6 +79,20 @@ end
 
 State(w, x) = State(w, x, [0.])
 
+function State(imodel::PoissonExpModel)
+    dim = imodel.dim
+    w = zeros(dim)
+    x = zeros(dim)
+    return State(w, x)
+end
+
+function State(imodel::BlockPoissonExpModel)
+    dim = imodel.numblocks * imodel.blocksize
+    w = zeros(dim)
+    x = zeros(dim)
+    return State(w, x)
+end
+
 function update!(state::State, model::InputModel, dt)
     update!(state.x, model, dt)
     return state
