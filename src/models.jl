@@ -1,6 +1,9 @@
 # `InputModel` subtypes are types of models for the dendritic input
 abstract type InputModel end
 
+# default InputModels are time-homogeneous
+update!(x, model::InputModel, dt, t) = update!(x, model, dt)
+
 struct PoissonExpModel{T1, T2} <: InputModel
     ρ::T1 # input firing rate
     τm::T2 # membrane time constant
@@ -21,6 +24,9 @@ end
 
 # `SynapseModel` subtypes are types of models for the evolution of synaptic weights
 abstract type SynapseModel end
+
+# default SynapseModels are time-homogeneous
+update!(x, model::SynapseModel, dt, t) = update!(x, model, dt)
 
 struct OUModel{T1, T2} <: SynapseModel
     τ::T1 # time constant for weight change
@@ -53,6 +59,9 @@ update!(state::State, model::SynapseModel, dt) = update!(state.w, model, dt)
 
 # `OutputModel` subtypes are types of models for the output neuron
 abstract type OutputModel end
+
+# default OutputModels are time-homogeneous
+update!(x, model::OutputModel, dt, t) = update!(x, model, dt)
 
 struct NeuronObs{T1, T2}
     x::T1 # input spikes / current
