@@ -1,5 +1,6 @@
 module SynapticFilter
 
+using CUDA: AnyCuMatrix
 using Distributions: Poisson
 using LinearAlgebra: dot
 
