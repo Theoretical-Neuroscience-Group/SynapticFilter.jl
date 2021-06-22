@@ -25,6 +25,28 @@ struct FullSF{T1, T2} <: SF
     OModel::T2
 end
 
+function FilterState(filter::DiagSF)
+    dim = filter.dim
+    μ = zeros(dim)
+    Σ = zeros(dim)
+    return FilterState(μ, Σ)
+end
+
+function FilterState(filter::BlockSF)
+    numblocks = filter.numblocks
+    blocksize = filter.blocksize
+    μ = zeros(numblocks * blocksize)
+    Σ = zeros(blocksize, blocksize, numblocks)
+    return FilterState(μ, Σ)
+end
+
+function FilterState(filter::FullSF)
+    dim = filter.dim
+    μ = zeros(dim)
+    Σ = zeros(dim, dim)
+    return FilterState(μ, Σ)
+end
+
 function update!(state::FilterState, filter::SF, obs::NeuronObs, dt)
     SModel = filter.SModel
     OModel = filter.OModel
