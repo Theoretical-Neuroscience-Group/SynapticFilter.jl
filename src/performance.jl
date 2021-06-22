@@ -25,4 +25,4 @@ function (f::MSE)(hstate::State, fstate::FilterState)
     f(w, μ)
 end
 
-(f::MSE)(w::AbstractArray, μ::AbstractArray) = mean((w .- μ).^2)
+(f::MSE)(w::AbstractArray, μ::AbstractArray) = msd(w, μ)
