@@ -9,20 +9,20 @@
         fstate = FilterState(μ, Σ)
 
         smodel = OUModel(1., 1.)
-        nmodel = NeuronModel(0.05, 0.1)
+        omodel = ExpGainModel(0.05, 0.1)
 
         x = [1, 1, 0, 1]
         y = 1
         obs = NeuronObs(x, y)
         dt = 1e-3
 
-        filter = FullSF(4, smodel, nmodel)
+        filter = FullSF(4, smodel, omodel)
 
         update!(fstate, filter, obs, dt)
 
         @test fstate.μ ≈ [0.29988898029434835, 0.5096884293090658, 0.48950055098528256, 0.00028347044152254863]
         @test fstate.Σ ≈ [1.2993977960588696 0.30139768586181315 0.20160011019705654 0.4011966940883045; 0.30139768586181315 0.9999975701549038 -0.39719988429309067 0.8003965287927197; 0.20160011019705654 -0.39719988429309067 0.6007999944901472 0.10180016529558478; 0.4011966940883045 0.8003965287927197 0.10180016529558478 1.7983950411324567]
-    end
+    end#FullSF
 
     @testset "DiagSF" begin
         using LinearAlgebra: diag, Diagonal
@@ -37,15 +37,15 @@
             fstate2 = FilterState(μ2, Σ2)
 
             smodel = OUModel(1., 1.)
-            nmodel = NeuronModel(0.05, 0.1)
+            omodel = ExpGainModel(0.05, 0.1)
 
             x = rand(dim)
             y = 1
             obs = NeuronObs(x, y)
             dt = 1e-3
 
-            filter = DiagSF(dim, smodel, nmodel)
-            filter2 = FullSF(dim, smodel, nmodel)
+            filter = DiagSF(dim, smodel, omodel)
+            filter2 = FullSF(dim, smodel, omodel)
 
             update!(fstate, filter, obs, dt)
             update!(fstate2, filter2, obs, dt)
@@ -53,7 +53,7 @@
             @test fstate.μ ≈ fstate2.μ
             @test maximum(abs.(fstate.Σ .- diag(fstate2.Σ))) < 1e-6
         end
-    end
+    end#DiagSF
 
     @testset "BlockSF" begin
         for blocksize in [2, 4, 8, 16, 32]
@@ -74,15 +74,15 @@
             fstate2 = FilterState(μ2, Σ2)
 
             smodel = OUModel(1., 1.)
-            nmodel = NeuronModel(0.05, 0.1)
+            omodel = ExpGainModel(0.05, 0.1)
 
             x = rand(dim)
             y = 1
             obs = NeuronObs(x, y)
             dt = 1e-3
 
-            filter = BlockSF(numblocks, blocksize, smodel, nmodel)
-            filter2 = FullSF(dim, smodel, nmodel)
+            filter = BlockSF(numblocks, blocksize, smodel, omodel)
+            filter2 = FullSF(dim, smodel, omodel)
 
             update!(fstate, filter, obs, dt)
             update!(fstate2, filter2, obs, dt)
@@ -93,8 +93,9 @@
                 @test fstate2.Σ[(i-1)*blocksize+j, (i-1)*blocksize+k] ≈ fstate.Σ[j, k, i]
             end 
         end
-    end
+    end#BlockSF
 
+    if RUN_BENCHMARKS
     @testset "Benchmark FullSF" begin
         using SynapticFilter: _filter_update!
 
@@ -114,7 +115,7 @@
         display(@benchmark _filter_update!($μ, $Σ, $τ, $σs, $g0, $β, $x, $y, $dt))
         println("")
         println("")
-    end
+    end#Benchmark FullSF
 
     @testset "Benchmark BlockSF" begin
         using SynapticFilter: _filter_update!
@@ -137,7 +138,7 @@
         display(@benchmark _filter_update!($μ, $Σ, $τ, $σs, $g0, $β, $x, $y, $dt))
         println("")
         println("")
-    end
+    end#Benchmark BlockSF
 
     @testset "Benchmark DiagSF" begin
         using SynapticFilter: _filter_update!
@@ -158,9 +159,9 @@
         display(@benchmark _filter_update!($μ, $Σ, $τ, $σs, $g0, $β, $x, $y, $dt))
         println("")
         println("")
-    end
+    end#Benchmark DiagSF
 
-    @testset "Benchmark FullSF" begin
+    @testset "Benchmark FullSF on GPU" begin
         using SynapticFilter: _filter_update!
         using CUDA
 
@@ -184,5 +185,6 @@
             println("")
             println("")
         end
-    end
-end
+    end#Benchmark FullSF on GPU
+    end#end if
+end#filters.jl
