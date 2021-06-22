@@ -186,5 +186,5 @@
             println("")
         end
     end#Benchmark FullSF on GPU
-    #end if
+    end#end if
 end#filters.jl
