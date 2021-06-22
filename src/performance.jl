@@ -15,6 +15,9 @@ function (f::ErrorMeasure)(sim::Simulation; num_timesteps, timestep, burnin::Int
 end
 
 function run(sim, num_timesteps, timestep, errormeasure, burnin)
+    if burnin >= num_timesteps
+        throw(DomainError(burnin, "burnin must be smaller than total number of timesteps"))
+    end
     sstate = SimulationState(sim.imodel, sim.filter)
     total_error = 0.
     for k in 1:num_timesteps

@@ -16,5 +16,19 @@
         mse = ComputeMSE(sim; num_timesteps = 100000, timestep = 0.01, burnin = 1000)
 
         @test 0.9 < mse < 1.1
+
+        filter = DiagSF(1, smodel, omodel)
+
+        sim = Simulation(imodel, smodel, omodel, filter)
+        mse = ComputeMSE(sim; num_timesteps = 100000, timestep = 0.01, burnin = 1000)
+
+        @test 0.9 < mse < 1.1
+
+        filter = BlockSF(1, 1, smodel, omodel)
+
+        sim = Simulation(imodel, smodel, omodel, filter)
+        mse = ComputeMSE(sim; num_timesteps = 100000, timestep = 0.01, burnin = 1000)
+
+        @test 0.9 < mse < 1.1
     end#ComputeMSE
 end#performance.jl
