@@ -61,7 +61,7 @@ end
 
 function update!(w::AbstractArray, model::OUModel, dt)
     α = dt / model.τ
-    σ = sqrt(dt * model.σs) / model.τ
+    σ = sqrt(2 * dt * model.σs / model.τ) 
     
     for i in eachindex(w)
         # Ornstein-Uhlenbeck process
