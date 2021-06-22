@@ -10,24 +10,24 @@ struct BlockSF{T1, T2} <: SF
     numblocks::Int
     blocksize::Int
     SModel::T1
-    NModel::T2
+    OModel::T2
 end
 
 struct DiagSF{T1, T2} <: SF
     dim::Int
     SModel::T1
-    NModel::T2
+    OModel::T2
 end
 
 struct FullSF{T1, T2} <: SF
     dim::Int
     SModel::T1
-    NModel::T2
+    OModel::T2
 end
 
 function update!(state::FilterState, filter::SF, obs::NeuronObs, dt)
     SModel = filter.SModel
-    NModel = filter.NModel
+    OModel = filter.OModel
 
     τ = SModel.τ
     σs = SModel.σs
@@ -35,8 +35,8 @@ function update!(state::FilterState, filter::SF, obs::NeuronObs, dt)
     μ = state.μ
     Σ = state.Σ
     
-    g0 = NModel.g0
-    β = NModel.β
+    g0 = OModel.g0
+    β = OModel.β
     
     x = obs.x
     y = obs.y
@@ -99,7 +99,7 @@ function _filter_update!(μ, Σ::AbstractMatrix, τ, σs, g0, β, x, y, dt)
     α2 = 2*α
     v = β * Σ * x
     u = β * dot(μ, x)
-    γ = g0 * dt * exp(u + dot(v, v)/2)
+    γ = g0 * dt * exp(u + dot(v, v) / 2)
     
     μ .+= -μ .* α .+ v .* (y - γ)
     Σ .-= γ .* v * transpose(v) .+ (Σ .- σs) .* α2

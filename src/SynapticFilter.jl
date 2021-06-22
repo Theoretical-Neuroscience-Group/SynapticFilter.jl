@@ -1,11 +1,16 @@
 module SynapticFilter
 
+using Distributions: Poisson
 using LinearAlgebra: dot
 
 include("models.jl")
-export 
-    NeuronModel, NeuronObs, OUModel,
-    update!
+export
+    update!,
+    State,
+    NeuronObs, 
+    PoissonExpModel,
+    ExpGainModel, AdaptiveExpGainModel, 
+    OUModel
 
 include("filters.jl")
 export 
