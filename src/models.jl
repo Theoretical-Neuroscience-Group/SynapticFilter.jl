@@ -21,6 +21,32 @@ function update!(x::AbstractArray, model::PoissonExpModel, dt)
     return x
 end
 
+struct BlockPoissonExpModel{T1, T2, T3} <: InputModel
+    ρ::T1 # input firing rate
+    τm::T2 # membrane time constant
+    numblocks::Int
+    blocksize::Int
+    τblock::T3
+end
+
+function update!(x::AbstractArray, model::BlockPoissonExpModel, dt, t)
+    αm = dt / model.τm
+    λ = dt * model.ρ
+
+    # compute scheduled block id (zero-based)
+    block_id = floor(Int, (t / model.τblock) % model.numblocks)
+
+    # sample only for indices within block:
+    istart = block_id * model.blocksize + 1
+    istop  = (block_id + 1) * model.blocksize
+    for i in istart:istop
+        # Poisson counts convolved with exponential kernel
+        @inbounds x[i] = x[i] * exp(-αm) + rand(Poisson(λ))
+    end
+    
+    return x
+end
+
 
 # `SynapseModel` subtypes are types of models for the evolution of synaptic weights
 abstract type SynapseModel end
@@ -55,6 +81,8 @@ State(w, x) = State(w, x, [0.])
 
 update!(state::State, model::InputModel, dt) = update!(state.x, model, dt)
 update!(state::State, model::SynapseModel, dt) = update!(state.w, model, dt)
+update!(state::State, model::InputModel, dt, t) = update!(state.x, model, dt, t)
+update!(state::State, model::SynapseModel, dt, t) = update!(state.w, model, dt, t)
 
 
 # `OutputModel` subtypes are types of models for the output neuron

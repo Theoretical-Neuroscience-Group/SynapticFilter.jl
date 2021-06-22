@@ -8,7 +8,7 @@ export
     update!,
     State,
     NeuronObs, 
-    PoissonExpModel,
+    PoissonExpModel, BlockPoissonExpModel,
     ExpGainModel, AdaptiveExpGainModel, 
     OUModel
 

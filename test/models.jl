@@ -33,6 +33,22 @@
         end
     end#PoissonExpModel
 
+    @testset "BlockPoissonExpModel" begin
+        @testset "" begin
+            x = zeros(32)
+            model = BlockPoissonExpModel(1, Inf, 8, 4, 1)
+
+            @test_throws MethodError update!(x, model, 0.01)
+
+            update!(x, model, 0.01, 0.)
+            @test all(x[5:32] .== 0)
+
+            update!(x, model, 0.01, 5.1)
+            @test all(x[5:20] .== 0)
+            @test all(x[25:32] .== 0)
+        end
+    end#BlockPoissonExpModel
+
     @testset "OUModel" begin
         @testset "Unit time constant, zero variance" begin
             w = ones(10)
@@ -156,6 +172,19 @@
         println("")
         println("")
     end#Benchmark PoissonExpModel
+
+    @testset "Benchmark BlockPoissonExpModel" begin
+        w = rand(1024)
+        x = rand(1024)
+        state = State(w, x)
+        model = BlockPoissonExpModel(1, 0.1, 128, 8, 1.)
+
+        println("")
+        println("Benchmarking one update step for BlockPoissonExpModel")
+        display(@benchmark update!($state, $model, 0.01, 5.2))
+        println("")
+        println("")
+    end#Benchmark BlockPoissonExpModel
 
     @testset "Benchmark OUModel" begin
         w = rand(1024)
