@@ -86,7 +86,7 @@ function _filter_update!(μ, Σ::AbstractArray{T, 3}, τ, σs, g0, β, x, y, dt)
 
         v = view(V, :, i)
 
-        v .= β .* Σ1 * x1
+        v .= β .* (Σ1 * x1)
         u += β * dot(μ1, x1) + dot(v, v) / 2
     end
 
@@ -119,17 +119,15 @@ end
 function _filter_update!(μ, Σ::AbstractMatrix, τ, σs, g0, β, x, y, dt)
     α = dt / τ
     α2 = 2*α
-    v = β * Σ * x
+    v = β * (Σ * x)
     u = β * dot(μ, x)
     γ = g0 * dt * exp(u + dot(v, v) / 2)
-    
-    μ .+= -μ .* α .+ v .* (y - γ)
 
     # explicit loops for 2.5x speedup and less allocations
     for j in 1:size(Σ, 2)
+        @inbounds μ[j] += -μ[j] * α + v[j] * (y - γ)
         for i in 1:size(Σ, 1)
-            @inbounds d = γ * v[i] * v[j] + (Σ[i, j] - σs) * α2
-            @inbounds Σ[i, j] -= d
+            @inbounds Σ[i, j] -= γ * v[i] * v[j] + (Σ[i, j] - σs) * α2
         end
     end
     return nothing
@@ -138,7 +136,7 @@ end
 function _filter_update!(μ, Σ::AnyCuMatrix, τ, σs, g0, β, x, y, dt)
     α = dt / τ
     α2 = 2*α
-    v = β * Σ * x
+    v = β * (Σ * x)
     u = β * dot(μ, x)
     γ = g0 * dt * exp(u + dot(v, v) / 2)
     
