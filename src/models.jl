@@ -79,10 +79,25 @@ end
 
 State(w, x) = State(w, x, [0.])
 
-update!(state::State, model::InputModel, dt) = update!(state.x, model, dt)
-update!(state::State, model::SynapseModel, dt) = update!(state.w, model, dt)
-update!(state::State, model::InputModel, dt, t) = update!(state.x, model, dt, t)
-update!(state::State, model::SynapseModel, dt, t) = update!(state.w, model, dt, t)
+function update!(state::State, model::InputModel, dt)
+    update!(state.x, model, dt)
+    return state
+end
+
+function update!(state::State, model::SynapseModel, dt)
+    update!(state.w, model, dt)
+    return state
+end
+
+function update!(state::State, model::InputModel, dt, t)
+    update!(state.x, model, dt, t)
+    return state
+end
+
+function update!(state::State, model::SynapseModel, dt, t)
+    update!(state.w, model, dt, t)
+    return state
+end
 
 
 # `OutputModel` subtypes are types of models for the output neuron
