@@ -40,12 +40,15 @@ function run(sim, num_timesteps, timestep, errormeasure, burnin)
     end
     sstate = SimulationState(sim.imodel, sim.filter)
     total_error = 0.
-    for k in 1:num_timesteps
-        time = k * timestep
+    time = 0.
+    for k in 1:burnin
         update!(sstate, sim, timestep, time)
-        if k > burnin
-            total_error += errormeasure(sstate)
-        end
+        time += timestep
+    end
+    for k in burnin+1:num_timesteps
+        update!(sstate, sim, timestep, time)
+        total_error += errormeasure(sstate)
+        time += timestep
     end
     return total_error / (num_timesteps - burnin)
 end
