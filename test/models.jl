@@ -143,13 +143,12 @@
         end
     end#AdaptiveExpGainModel
 
+    if RUN_BENCHMARKS
     @testset "Benchmark PoissonExpModel" begin
         w = rand(1024)
         x = rand(1024)
         state = State(w, x)
         model = PoissonExpModel(1, 0.1)
-
-        update!(state, model, 0.01)
 
         println("")
         println("Benchmarking one update step for PoissonExpModel")
@@ -164,12 +163,37 @@
         state = State(w, x)
         model = OUModel(1, 0.1)
 
-        update!(state, model, 0.01)
-
         println("")
         println("Benchmarking one update step for OUModel")
         display(@benchmark update!($state, $model, 0.01))
         println("")
         println("")
     end#Benchmark OUModel
+
+    @testset "Benchmark ExpGainModel" begin
+        w = rand(1024)
+        x = rand(1024)
+        state = State(w, x)
+        model = ExpGainModel(1, 0.1)
+
+        println("")
+        println("Benchmarking one update step for ExpGainModel")
+        display(@benchmark update!($state, $model, 0.01))
+        println("")
+        println("")
+    end#Benchmark ExpGainModel
+
+    @testset "Benchmark AdaptiveExpGainModel" begin
+        w = randn(1024)
+        x = randn(1024)
+        state = State(w, x)
+        model = AdaptiveExpGainModel(1, 0.01, -1, 10.)
+
+        println("")
+        println("Benchmarking one update step for AdaptiveExpGainModel")
+        display(@benchmark update!($state, $model, 0.01))
+        println("")
+        println("")
+    end#Benchmark AdaptiveExpGainModel
+    end#if
 end#models.jl

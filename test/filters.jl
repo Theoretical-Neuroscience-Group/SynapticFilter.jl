@@ -95,6 +95,7 @@
         end
     end#BlockSF
 
+    if RUN_BENCHMARKS
     @testset "Benchmark FullSF" begin
         using SynapticFilter: _filter_update!
 
@@ -185,4 +186,5 @@
             println("")
         end
     end#Benchmark FullSF on GPU
+    #end if
 end#filters.jl
