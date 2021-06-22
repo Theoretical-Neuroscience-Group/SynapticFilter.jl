@@ -7,6 +7,7 @@ update!(x, model::InputModel, dt, t) = update!(x, model, dt)
 struct PoissonExpModel{T1, T2} <: InputModel
     ρ::T1 # input firing rate
     τm::T2 # membrane time constant
+    dim::Int # dimensionality
 end
 
 function update!(x::AbstractArray, model::PoissonExpModel, dt)
@@ -61,7 +62,7 @@ end
 
 function update!(w::AbstractArray, model::OUModel, dt)
     α = dt / model.τ
-    σ = sqrt(dt * model.σs) / model.τ
+    σ = sqrt(2 * dt * model.σs / model.τ) 
     
     for i in eachindex(w)
         # Ornstein-Uhlenbeck process
@@ -78,6 +79,20 @@ struct State{T1, T2, T3}
 end
 
 State(w, x) = State(w, x, [0.])
+
+function State(imodel::PoissonExpModel)
+    dim = imodel.dim
+    w = zeros(dim)
+    x = zeros(dim)
+    return State(w, x)
+end
+
+function State(imodel::BlockPoissonExpModel)
+    dim = imodel.numblocks * imodel.blocksize
+    w = zeros(dim)
+    x = zeros(dim)
+    return State(w, x)
+end
 
 function update!(state::State, model::InputModel, dt)
     update!(state.x, model, dt)

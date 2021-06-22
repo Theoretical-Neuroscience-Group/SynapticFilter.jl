@@ -6,4 +6,5 @@ const RUN_BENCHMARKS = false # optional intermediate benchmarks
 @testset "SynapticFilter.jl" begin
     include("models.jl")
     include("filters.jl")
+    include("performance.jl")
 end
