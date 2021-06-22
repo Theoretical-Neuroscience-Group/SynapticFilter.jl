@@ -56,11 +56,16 @@
         x = ones(10)
         state = State(w, x)
 
-        Smodel = OUModel(1, 0)
-        Smodel = OUModel(1, 0)
-        update!(w, Smodel, 0.01)
+        Imodel = PoissonExpModel(1, 0.1)
+        Smodel = OUModel(1, 1)
 
-        @test all(w .== 0.99)
+        xcopy = copy(x)
+        update!(state, Imodel, 0.01)
+        @test all(state.x .== xcopy)
+
+        wcopy = copy(state.w)
+        update!(state, Smodel, 0.01)
+        @test all(state.w .== wcopy)
     end#State
 
     @testset "ExpGainModel" begin
@@ -137,4 +142,25 @@
             @test all(obs.x   .== xcopy)
         end
     end#AdaptiveExpGainModel
+
+    @testset "Benchmark FullSF" begin
+        using SynapticFilter: _filter_update!
+
+        dim = 1024
+        μ  = rand(dim)
+        Σ  = rand(dim, dim)
+        x  = rand(dim)
+        y  = 1
+        g0 = 0.1
+        β  = 0.01
+        τ  = 1.
+        σs = 1.
+        dt = 1e-3
+
+        println("")
+        println("Benchmarking one filter update step for FullSF")
+        display(@benchmark _filter_update!($μ, $Σ, $τ, $σs, $g0, $β, $x, $y, $dt))
+        println("")
+        println("")
+    end#Benchmark FullSF
 end#models.jl
