@@ -166,6 +166,7 @@
         using CUDA
 
         if CUDA.functional()
+            CUDA.allowscalar(false)
             dim = 1024
             μ  = CUDA.rand(dim)
             Σ  = CUDA.rand(dim, dim)
