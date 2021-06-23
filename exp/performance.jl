@@ -19,8 +19,8 @@ num_burnin = 2                              # number of epochs to burn in
 ts_per_sec = 1000                           # number of timesteps per seconds 
                                             # (reciprocal of timestep)
 num_timesteps = num_epochs*epoch*ts_per_sec # total number of timesteps
-burnin = num_burnin*epoch*ts_per_sec        # number of timesteps for burn in
-timestep = 1/ts_per_sec                     # time step
+burnin        = num_burnin*epoch*ts_per_sec # number of timesteps for burn in
+timestep      = 1/ts_per_sec                # time step
 
 resultsFull  = Dict{Int, Float64}()
 resultsBlock = Dict{Int, Float64}()
