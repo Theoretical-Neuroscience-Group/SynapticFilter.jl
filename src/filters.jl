@@ -67,6 +67,14 @@ function update!(state::FilterState, filter::SF, obs::NeuronObs, dt)
     return state
 end
 
+function expterm(μ::AbstractVector{T1}, x::AbstractVector{T2}, v::AbstractVector{T1}) where {T1, T2}
+    sum = zero(T1)
+    for i in eachindex(μ)
+        @inbounds sum += x[i] * (μ[i] + v[i] / 2)
+    end
+    return sum
+end
+
 function _filter_update!(μ, Σ::AbstractArray{T, 3}, τ, σs, g0, β, x, y, dt) where T
     numblocks = size(Σ, 3)
     blocksize = size(Σ, 2)
@@ -87,7 +95,7 @@ function _filter_update!(μ, Σ::AbstractArray{T, 3}, τ, σs, g0, β, x, y, dt)
         v = view(V, :, i)
 
         v .= β .* (Σ1 * x1)
-        u += β * (dot(μ1, x1) + dot(x1, v) / 2)
+        u += β * expterm(μ1, x1, v)
     end
 
     @inbounds for i in 1:numblocks
@@ -112,7 +120,7 @@ function _filter_update!(μ, Σ::AbstractVector, τ, σs, g0, β, x, y, dt)
     α2 = 2*α
 
     v = β .* Σ .* x
-    γ = g0 * dt * exp(β * (dot(μ, x) + dot(x, v) / 2))
+    γ = g0 * dt * exp(β * expterm(μ, x, v))
     
     μ .+= - μ .* α .+ v .* (y - γ)
     Σ .+= -γ .* v .* v .- (Σ .- σs) .* α2
@@ -123,7 +131,7 @@ function _filter_update!(μ, Σ::AbstractMatrix, τ, σs, g0, β, x, y, dt)
     α = dt / τ
     α2 = 2*α
     v = β * (Σ * x)
-    γ = g0 * dt * exp(β * (dot(μ, x) + dot(x, v) / 2))
+    γ = g0 * dt * exp(β * expterm(μ, x, v))
 
     # explicit loops for 2.5x speedup and less allocations
     for j in 1:size(Σ, 2)
