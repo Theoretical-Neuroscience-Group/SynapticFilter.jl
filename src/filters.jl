@@ -67,6 +67,14 @@ function update!(state::FilterState, filter::SF, obs::NeuronObs, dt)
     return state
 end
 
+function expterm(μ::AbstractVector{T1}, x::AbstractVector{T2}, v::AbstractVector{T1}) where {T1, T2}
+    sum = zero(T1)
+    for i in eachindex(μ)
+        @inbounds sum += x[i] * (μ[i] + v[i] / 2)
+    end
+    return sum
+end
+
 function _filter_update!(μ, Σ::AbstractArray{T, 3}, τ, σs, g0, β, x, y, dt) where T
     numblocks = size(Σ, 3)
     blocksize = size(Σ, 2)
@@ -87,7 +95,7 @@ function _filter_update!(μ, Σ::AbstractArray{T, 3}, τ, σs, g0, β, x, y, dt)
         v = view(V, :, i)
 
         v .= β .* (Σ1 * x1)
-        u += β * dot(μ1, x1) + dot(v, v) / 2
+        u += β * expterm(μ1, x1, v)
     end
 
     @inbounds for i in 1:numblocks
@@ -95,10 +103,14 @@ function _filter_update!(μ, Σ::AbstractArray{T, 3}, τ, σs, g0, β, x, y, dt)
         Σ1 = view(Σ, :, :, i)
 
         v = view(V, :, i)
-
         γ = g0 * dt * exp(u)
-        μ1 .+= -μ1 .* α .+ v .* (y - γ)
-        Σ1 .-= γ .* v * transpose(v) .+ (Σ1 .- σs) .* α2
+
+        for j in 1:size(Σ1, 2)
+            @inbounds μ1[j] += -μ1[j] * α + v[j] * (y - γ)
+            for i in 1:size(Σ1, 1)
+                @inbounds Σ1[i, j] -= γ * v[i] * v[j] + (Σ1[i, j] - σs * (i==j)) * α2
+            end
+        end
     end
     return nothing
 end
@@ -108,8 +120,7 @@ function _filter_update!(μ, Σ::AbstractVector, τ, σs, g0, β, x, y, dt)
     α2 = 2*α
 
     v = β .* Σ .* x
-    u = β * dot(μ, x)
-    γ = g0 * dt * exp(u + dot(v, v) / 2)
+    γ = g0 * dt * exp(β * expterm(μ, x, v))
     
     μ .+= - μ .* α .+ v .* (y - γ)
     Σ .+= -γ .* v .* v .- (Σ .- σs) .* α2
@@ -120,14 +131,13 @@ function _filter_update!(μ, Σ::AbstractMatrix, τ, σs, g0, β, x, y, dt)
     α = dt / τ
     α2 = 2*α
     v = β * (Σ * x)
-    u = β * dot(μ, x)
-    γ = g0 * dt * exp(u + dot(v, v) / 2)
+    γ = g0 * dt * exp(β * expterm(μ, x, v))
 
     # explicit loops for 2.5x speedup and less allocations
     for j in 1:size(Σ, 2)
         @inbounds μ[j] += -μ[j] * α + v[j] * (y - γ)
         for i in 1:size(Σ, 1)
-            @inbounds Σ[i, j] -= γ * v[i] * v[j] + (Σ[i, j] - σs) * α2
+            @inbounds Σ[i, j] -= γ * v[i] * v[j] + (Σ[i, j] - σs * (i==j)) * α2
         end
     end
     return nothing
@@ -137,10 +147,11 @@ function _filter_update!(μ, Σ::AnyCuMatrix, τ, σs, g0, β, x, y, dt)
     α = dt / τ
     α2 = 2*α
     v = β * (Σ * x)
-    u = β * dot(μ, x)
-    γ = g0 * dt * exp(u + dot(v, v) / 2)
+    γ = g0 * dt * exp(β * (dot(μ, x) + dot(x, v) / 2))
     
     μ .+= -μ .* α .+ v .* (y - γ)
-    Σ .-= γ .* v * transpose(v) .+ (Σ .- σs) .* α2
+    view(Σ, diagind(Σ)) .-= σs
+    Σ .-= γ .* v * transpose(v) .+ Σ .* α2
+    view(Σ, diagind(Σ)) .+= σs
     return nothing
 end
