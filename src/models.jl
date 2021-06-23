@@ -11,14 +11,16 @@ struct PoissonExpModel{T1, T2} <: InputModel
 end
 
 # Poisson count convolved with exponential kernel
-poisson_update(x, αm, λ) = x * exp(-αm) + rand(Poisson(λ))
+# amplitude is chosen such that the kernel is normalized to one
+poisson_update(x, τm, αm, λ) = x * exp(-αm) + rand(Poisson(λ)) / τm
 
 function update!(x::AbstractArray, model::PoissonExpModel, dt)
-    αm = dt / model.τm
+    τm = model.τm
+    αm = dt / τm
     λ = dt * model.ρ
 
     for i in eachindex(x)
-        @inbounds x[i] = poisson_update(x[i], αm, λ)
+        @inbounds x[i] = poisson_update(x[i], τm, αm, λ)
     end
     
     return x
@@ -34,7 +36,8 @@ struct BlockPoissonExpModel{T1, T2, T3} <: InputModel
 end
 
 function update!(x::AbstractArray, model::BlockPoissonExpModel, dt, t)
-    αm = dt / model.τm
+    τm = model.τm
+    αm = dt / τm
     λ = dt * model.ρ
 
     # compute scheduled block id (zero-based)
@@ -44,7 +47,7 @@ function update!(x::AbstractArray, model::BlockPoissonExpModel, dt, t)
     istart = block_id * model.blocksize + 1
     istop  = (block_id + 1) * model.blocksize
     for i in istart:istop
-        @inbounds x[i] = poisson_update(x[i], αm, λ)
+        @inbounds x[i] = poisson_update(x[i], τm, αm, λ)
     end
     
     return x
