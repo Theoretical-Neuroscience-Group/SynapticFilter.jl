@@ -31,12 +31,13 @@ resultsDiag  = Dict{Int, Float64}()
 # Performance simulations #
 ###########################
 
+imodel = BlockPoissonExpModel(ρ, τm, numblocks, blocksize, τblock)
+smodel = OUModel(τ, σs)
+
 # performance sims for DiagSF, loop over number of blocks in parallel
 Threads.@threads for numblocks in 1:10
     dim = numblocks * blocksize
 
-    imodel = BlockPoissonExpModel(ρ, τm, numblocks, blocksize, τblock)
-    smodel = OUModel(τ, σs)
     omodel = ExpGainModel(g0, β0 / sqrt(numblocks))
     filter = DiagSF(dim, smodel, omodel)
 
@@ -54,8 +55,6 @@ end
 Threads.@threads for numblocks in 1:10
     dim = numblocks * blocksize
 
-    imodel = BlockPoissonExpModel(ρ, τm, numblocks, blocksize, τblock)
-    smodel = OUModel(τ, σs)
     omodel = ExpGainModel(g0, β0 / sqrt(numblocks))
     filter = FullSF(dim, smodel, omodel)
 
@@ -73,8 +72,6 @@ end
 Threads.@threads for numblocks in 1:10
     dim = numblocks * blocksize
 
-    imodel = BlockPoissonExpModel(ρ, τm, numblocks, blocksize, τblock)
-    smodel = OUModel(τ, σs)
     omodel = ExpGainModel(g0, β0 / sqrt(numblocks))
     filter = BlockSF(numblocks, blocksize, smodel, omodel)
 
