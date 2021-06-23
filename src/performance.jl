@@ -22,7 +22,5 @@ ComputeMSE = MSE()
 function (f::MSE)(hstate::State, fstate::FilterState)
     w = hstate.w 
     μ = fstate.μ
-    f(w, μ)
+    msd(w, μ)
 end
-
-(f::MSE)(w::AbstractArray, μ::AbstractArray) = msd(w, μ)
