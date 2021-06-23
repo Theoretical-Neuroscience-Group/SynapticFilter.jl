@@ -1,3 +1,7 @@
+#########
+# Setup #
+#########
+
 using SynapticFilter
 
 ρ         = 40   # input firing rate
@@ -22,6 +26,12 @@ resultsFull  = Dict{Int, Float64}()
 resultsBlock = Dict{Int, Float64}()
 resultsDiag  = Dict{Int, Float64}()
 
+
+###########################
+# Performance simulations #
+###########################
+
+# performance sims for DiagSF, loop over number of blocks in parallel
 Threads.@threads for numblocks in 1:10
     dim = numblocks * blocksize
 
@@ -40,6 +50,7 @@ Threads.@threads for numblocks in 1:10
     resultsDiag[numblocks] = mse
 end
 
+# performance sims for FullSF, loop over number of blocks in parallel
 Threads.@threads for numblocks in 1:10
     dim = numblocks * blocksize
 
@@ -58,6 +69,7 @@ Threads.@threads for numblocks in 1:10
     resultsFull[numblocks] = mse
 end
 
+# performance sims for BlockSF, loop over number of blocks in parallel
 Threads.@threads for numblocks in 1:10
     dim = numblocks * blocksize
 
@@ -76,13 +88,34 @@ Threads.@threads for numblocks in 1:10
     resultsBlock[numblocks] = mse
 end
 
+
+############
+# Plotting #
+############
+
 using Plots
-plot(resultsFull, label = "full SF")
-plot!(resultsBlock, label = "block SF")
+plot(
+    resultsDiag, 
+    label = "diagonal SF", 
+    color = "black", 
+    markershape = :circle,
+    legend = :bottomright
+)
 plot!(
-    resultsDiag, label = "diagonal SF", 
+    resultsBlock, 
+    label = "block SF", 
+    color = "gray", 
+    markershape = :circle,
+    markercolor = "gray"
+)
+plot!(
+    resultsFull, 
+    label = "full SF", 
+    color = "red",
+    markercolor = "red",
+    markershape = :circle, 
     xlabel = "number of input blocks of size 10",
-    ylabel = "mean-squared error"
+    ylabel = "mean-squared error", 
 )
 
 savefig("exp/fig/plot.png")
