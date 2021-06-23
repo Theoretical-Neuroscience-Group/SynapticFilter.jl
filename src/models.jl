@@ -13,6 +13,7 @@ end
 # Poisson count convolved with exponential kernel
 # amplitude is chosen such that the kernel is normalized to one
 poisson_update(x, τm, αm, λ) = x * exp(-αm) + rand(Poisson(λ)) / τm
+poisson_update0(x, αm) = x * exp(-αm) # no spike
 
 function update!(x::AbstractArray, model::PoissonExpModel, dt)
     τm = model.τm
@@ -46,8 +47,14 @@ function update!(x::AbstractArray, model::BlockPoissonExpModel, dt, t)
     # sample only for indices within block:
     istart = block_id * model.blocksize + 1
     istop  = (block_id + 1) * model.blocksize
+    for i in 1:istart-1
+        @inbounds x[i] = poisson_update0(x[i], αm)
+    end
     for i in istart:istop
         @inbounds x[i] = poisson_update(x[i], τm, αm, λ)
+    end
+    for i in istop+1:length(x)
+        @inbounds x[i] = poisson_update0(x[i], αm)
     end
     
     return x
