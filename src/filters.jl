@@ -142,6 +142,8 @@ function _filter_update!(μ, Σ::AnyCuMatrix, τ, σs, g0, β, x, y, dt)
     γ = g0 * dt * exp(β * (dot(μ, x) + dot(x, v) / 2))
     
     μ .+= -μ .* α .+ v .* (y - γ)
-    Σ .-= γ .* v * transpose(v) .+ (Σ .- σs) .* α2
+    view(Σ, diagind(Σ)) .-= σs
+    Σ .-= γ .* v * transpose(v) .+ Σ .* α2
+    view(Σ, diagind(Σ)) .+= σs
     return nothing
 end

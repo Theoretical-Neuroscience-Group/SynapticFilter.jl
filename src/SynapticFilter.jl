@@ -3,7 +3,7 @@ module SynapticFilter
 using CUDA: AnyCuMatrix
 using Distances: msd
 using Distributions: Poisson
-using LinearAlgebra: dot
+using LinearAlgebra: dot, diagind
 using Statistics: mean
 
 include("models.jl")
