@@ -95,10 +95,14 @@ function _filter_update!(μ, Σ::AbstractArray{T, 3}, τ, σs, g0, β, x, y, dt)
         Σ1 = view(Σ, :, :, i)
 
         v = view(V, :, i)
-
         γ = g0 * dt * exp(u)
-        μ1 .+= -μ1 .* α .+ v .* (y - γ)
-        Σ1 .-= γ .* v * transpose(v) .+ (Σ1 .- σs) .* α2
+
+        for j in 1:size(Σ1, 2)
+            @inbounds μ1[j] += -μ1[j] * α + v[j] * (y - γ)
+            for i in 1:size(Σ1, 1)
+                @inbounds Σ1[i, j] -= γ * v[i] * v[j] + (Σ1[i, j] - σs * (i==j)) * α2
+            end
+        end
     end
     return nothing
 end
@@ -125,7 +129,7 @@ function _filter_update!(μ, Σ::AbstractMatrix, τ, σs, g0, β, x, y, dt)
     for j in 1:size(Σ, 2)
         @inbounds μ[j] += -μ[j] * α + v[j] * (y - γ)
         for i in 1:size(Σ, 1)
-            @inbounds Σ[i, j] -= γ * v[i] * v[j] + (Σ[i, j] - σs) * α2
+            @inbounds Σ[i, j] -= γ * v[i] * v[j] + (Σ[i, j] - σs * (i==j)) * α2
         end
     end
     return nothing

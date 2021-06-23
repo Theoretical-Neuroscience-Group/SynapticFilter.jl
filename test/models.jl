@@ -1,13 +1,5 @@
 @testset "models.jl" begin
     @testset "PoissonExpModel" begin
-        @testset "Zero firing rate, zero time constant" begin
-            x = ones(10)
-            model = PoissonExpModel(0, 0, 10)
-            update!(x, model, 0.01)
-
-            @test all(x .== 0)
-        end
-
         @testset "Zero firing rate, infinite time constant" begin
             x = ones(10)
             model = PoissonExpModel(0, Inf, 10)
