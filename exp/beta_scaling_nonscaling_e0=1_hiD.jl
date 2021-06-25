@@ -193,4 +193,65 @@ plot!(
     markershape = :cross
 )
 
-savefig("exp/fig/beta_scaling_nonscaling_e0=1_hiD2.png")
+savefig("exp/fig/beta_scaling_nonscaling_e0=1_hiD.png")
+
+using CSV
+
+df = DataFrame(
+    :filter => :FullSF, 
+    :beta_scaling => false,
+    :numblocks => collect(keys(resultsFull)), 
+    :mse => collect(values(resultsFull))
+    )
+
+append!(
+    df,
+    Dict(
+    :filter => :BlockSF, 
+    :beta_scaling => false,
+    :numblocks => collect(keys(resultsBlock)), 
+    :mse => collect(values(resultsBlock))
+    )
+)
+
+append!(
+    df,
+    Dict(
+    :filter => :DiagSF, 
+    :beta_scaling => false,
+    :numblocks => collect(keys(resultsDiag)), 
+    :mse => collect(values(resultsDiag))
+    )
+)
+
+append!(
+    df,
+    Dict(
+    :filter => :BlockSF, 
+    :beta_scaling => true,
+    :numblocks => collect(keys(resultsBlockS)), 
+    :mse => collect(values(resultsBlockS))
+    )
+)
+
+append!(
+    df,
+    Dict(
+    :filter => :BlockSF, 
+    :beta_scaling => true,
+    :numblocks => collect(keys(resultsBlockS)), 
+    :mse => collect(values(resultsBlockS))
+    )
+)
+
+append!(
+    df,
+    Dict(
+    :filter => :DiagSF, 
+    :beta_scaling => true,
+    :numblocks => collect(keys(resultsDiagS)), 
+    :mse => collect(values(resultsDiagS))
+    )
+)
+
+CSV.write("exp/csv/beta_scaling_nonscaling_e0=1_hiD2.csv", df)
