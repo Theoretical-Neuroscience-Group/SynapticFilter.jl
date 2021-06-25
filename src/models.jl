@@ -10,18 +10,14 @@ struct PoissonExpModel{T1, T2} <: InputModel
     dim::Int # dimensionality
 end
 
-# Poisson count convolved with exponential kernel
-# amplitude is chosen such that the kernel is normalized to one
-poisson_update(x, τm, αm, λ) = x * exp(-αm) + rand(Poisson(λ)) / τm
-poisson_update0(x, αm) = x * exp(-αm) # no spike
-
 function update!(x::AbstractArray, model::PoissonExpModel, dt)
     τm = model.τm
     αm = dt / τm
     λ = dt * model.ρ
 
     for i in eachindex(x)
-        @inbounds x[i] = poisson_update(x[i], τm, αm, λ)
+        @inbounds x[i] *= exp(-αm)
+        @inbounds x[i] += rand(Poisson(λ)) / τm
     end
     
     return x
@@ -41,22 +37,19 @@ function update!(x::AbstractArray, model::BlockPoissonExpModel, dt, t)
     αm = dt / τm
     λ = dt * model.ρ
 
+    # decay for all indices
+    x .*= exp(-αm)
+
     # compute scheduled block id (zero-based)
     block_id = floor(Int, (t / model.τblock) % model.numblocks)
 
-    # sample only for indices within block:
+    # sample new spikes only for indices within block:
     istart = block_id * model.blocksize + 1
     istop  = (block_id + 1) * model.blocksize
-    for i in 1:istart-1
-        @inbounds x[i] = poisson_update0(x[i], αm)
-    end
     for i in istart:istop
-        @inbounds x[i] = poisson_update(x[i], τm, αm, λ)
+        @inbounds x[i] += rand(Poisson(λ)) / τm
     end
-    for i in istop+1:length(x)
-        @inbounds x[i] = poisson_update0(x[i], αm)
-    end
-    
+
     return x
 end
 
@@ -92,19 +85,14 @@ end
 
 State(w, x) = State(w, x, [0.])
 
-function State(imodel::PoissonExpModel)
-    dim = imodel.dim
+function State(dim::Integer)
     w = zeros(dim)
     x = zeros(dim)
     return State(w, x)
 end
 
-function State(imodel::BlockPoissonExpModel)
-    dim = imodel.numblocks * imodel.blocksize
-    w = zeros(dim)
-    x = zeros(dim)
-    return State(w, x)
-end
+State(imodel::PoissonExpModel) = State(imodel.dim)
+State(imodel::BlockPoissonExpModel) = State(imodel.numblocks * imodel.blocksize)
 
 function update!(state::State, model::InputModel, dt)
     update!(state.x, model, dt)

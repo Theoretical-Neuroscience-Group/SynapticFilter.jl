@@ -75,6 +75,20 @@ function expterm(μ::AbstractVector{T1}, x::AbstractVector{T2}, v::AbstractVecto
     return sum
 end
 
+# update for diagonal filter
+function _filter_update!(μ, Σ::AbstractVector, τ, σs, g0, β, x, y, dt)
+    α = dt / τ
+    α2 = 2*α
+
+    v = β .* Σ .* x
+    γ = g0 * dt * exp(β * expterm(μ, x, v))
+    
+    μ .+= -μ .* α .+ v .* (y - γ)
+    Σ .-= γ .* v .* v .+ (Σ .- σs) .* α2
+    return nothing
+end
+
+# update for block filter
 function _filter_update!(μ, Σ::AbstractArray{T, 3}, τ, σs, g0, β, x, y, dt) where T
     numblocks = size(Σ, 3)
     blocksize = size(Σ, 2)
@@ -115,18 +129,7 @@ function _filter_update!(μ, Σ::AbstractArray{T, 3}, τ, σs, g0, β, x, y, dt)
     return nothing
 end
 
-function _filter_update!(μ, Σ::AbstractVector, τ, σs, g0, β, x, y, dt)
-    α = dt / τ
-    α2 = 2*α
-
-    v = β .* Σ .* x
-    γ = g0 * dt * exp(β * expterm(μ, x, v))
-    
-    μ .+= - μ .* α .+ v .* (y - γ)
-    Σ .+= -γ .* v .* v .- (Σ .- σs) .* α2
-    return nothing
-end
-
+# update for full filter
 function _filter_update!(μ, Σ::AbstractMatrix, τ, σs, g0, β, x, y, dt)
     α = dt / τ
     α2 = 2*α
