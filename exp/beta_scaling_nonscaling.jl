@@ -16,7 +16,6 @@ i = parse(Int, ENV["LSB_JOBINDEX"]) # set this to a fixed number when not on the
 g0        = 20   # baseline output firing rate
 β0        = 0.1  # gain for numblocks = 1
 blocksize = 8    # size of input block
-τblock    = 0.1  # duration of block activation
 
 epoch      = ceil(Int, τ)                   # duration of one epoch
 num_epochs = parse.(Int, ARGS)[1]           # number of epochs to simulate 
