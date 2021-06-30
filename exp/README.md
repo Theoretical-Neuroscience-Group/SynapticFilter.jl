@@ -9,8 +9,10 @@ Figures can be found in `/fig`.
 
 ## Setup
 
-In order to set up the environment, start Julia in this subfolder and type
+In order to set up the environment on a local machine/cluster, copy this folder (i.e. `exp`) to the login/home folder.
+Then start Julia in this folder and type
 
 ```julia
+]activate .
 ]instantiate
 ```
