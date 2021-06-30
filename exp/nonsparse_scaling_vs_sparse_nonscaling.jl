@@ -6,7 +6,7 @@ using CSV
 using DataFrames
 using SynapticFilter
 
-i = 1#parse(Int, ENV["LSB_JOBINDEX"])
+i = parse(Int, ENV["LSB_JOBINDEX"]) # set this to a fixed number when not on the cluster
 
 ρ         = 40    # input firing rate
 τm        = 0.025 # membrane time constant
