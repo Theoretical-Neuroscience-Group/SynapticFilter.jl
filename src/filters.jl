@@ -25,6 +25,13 @@ struct FullSF{T1, T2} <: SF
     OModel::T2
 end
 
+struct GradientRule{T1, T2, T3} <: SF
+    dim::Int
+    SModel::T1
+    OModel::T2
+    η::T3 # learning rate
+end
+
 function FilterState(filter::DiagSF)
     dim = filter.dim
     μ = zeros(dim)
@@ -44,6 +51,13 @@ function FilterState(filter::FullSF)
     dim = filter.dim
     μ = zeros(dim)
     Σ = zeros(dim, dim)
+    return FilterState(μ, Σ)
+end
+
+function FilterState(filter::GradientRule)
+    dim = filter.dim
+    μ = zeros(dim)
+    Σ = filter.η
     return FilterState(μ, Σ)
 end
 
@@ -156,5 +170,14 @@ function _filter_update!(μ, Σ::AnyCuMatrix, τ, σs, g0, β, x, y, dt)
     view(Σ, diagind(Σ)) .-= σs
     Σ .-= γ .* v * transpose(v) .+ Σ .* α2
     view(Σ, diagind(Σ)) .+= σs
+    return nothing
+end
+
+# update for gradient rule
+function _filter_update!(μ, Σ::Number, τ, σs, g0, β, x, y, dt)
+    v = (β * Σ) .* x
+    γ = g0 * dt * exp(β * expterm(μ, x, v))
+    
+    μ .+= v .* (y - γ)
     return nothing
 end
