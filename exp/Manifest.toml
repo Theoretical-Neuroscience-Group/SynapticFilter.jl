@@ -772,7 +772,7 @@ uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 [[SynapticFilter]]
 deps = ["BenchmarkTools", "CSV", "CUDA", "DataFrames", "Distances", "Distributions", "LaTeXStrings", "LinearAlgebra", "PGFPlotsX", "Plots", "Statistics"]
 git-tree-sha1 = "e3d1cf5772ebcc1a80114c186367c4da75fcbaa2"
-repo-rev = "gradient"
+repo-rev = "master"
 repo-url = "https://github.com/Theoretical-Neuroscience-Group/SynapticFilter.jl"
 uuid = "0abcfceb-3f96-43f0-b19e-42926d139924"
 version = "0.1.0"
