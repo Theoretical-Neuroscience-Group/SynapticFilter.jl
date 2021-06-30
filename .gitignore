@@ -1,6 +1,7 @@
 *.jl.*.cov
 *.jl.cov
 *.jl.mem
+*checkpoint.ipynb
 
 /Manifest.toml
 test.jl
