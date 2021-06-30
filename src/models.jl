@@ -4,36 +4,48 @@ abstract type InputModel end
 # default InputModels are time-homogeneous
 update!(x, model::InputModel, dt, t) = update!(x, model, dt)
 
-struct PoissonExpModel{T1, T2} <: InputModel
+struct PoissonExpModel{T1, T2, T3} <: InputModel
     ρ::T1    # input firing rate
     τm::T2   # membrane time constant
+    ε0::T3   # amplitude of EPSP
     dim::Int # dimensionality
 end
 
+# default amplitude is chosen such that the postsynaptic kernel is normalized to one
+PoissonExpModel(ρ, τm, dim::Int) = PoissonExpModel(ρ, τm, 1/τm, dim)
+
 function update!(x::AbstractArray, model::PoissonExpModel, dt)
     τm = model.τm
+    ε0 = model.ε0
     αm = dt / τm
     λ = dt * model.ρ
 
     for i in eachindex(x)
         @inbounds x[i] *= exp(-αm)
-        @inbounds x[i] += rand(Poisson(λ)) / τm
+        @inbounds x[i] += ε0 * rand(Poisson(λ))
     end
     
     return x
 end
 
 # input neurons are active in equal-sized blocks
-struct BlockPoissonExpModel{T1, T2, T3} <: InputModel
+struct BlockPoissonExpModel{T1, T2, T3, T4} <: InputModel
     ρ::T1           # input firing rate
     τm::T2          # membrane time constant
+    ε0::T3          # amplitude of EPSP
     numblocks::Int  # number of blocks
     blocksize::Int  # size of blocks
-    τblock::T3      # duration of activation of a single block
+    τblock::T4      # duration of activation of a single block
 end
+
+# default amplitude is chosen such that the postsynaptic kernel is normalized to one
+BlockPoissonExpModel(
+    ρ, τm, numblocks::Int, blocksize::Int, τblock
+) = BlockPoissonExpModel(ρ, τm, 1/τm, numblocks::Int, blocksize::Int, τblock)
 
 function update!(x::AbstractArray, model::BlockPoissonExpModel, dt, t)
     τm = model.τm
+    ε0 = model.ε0
     αm = dt / τm
     λ = dt * model.ρ
 
@@ -47,7 +59,7 @@ function update!(x::AbstractArray, model::BlockPoissonExpModel, dt, t)
     istart = block_id * model.blocksize + 1
     istop  = (block_id + 1) * model.blocksize
     for i in istart:istop
-        @inbounds x[i] += rand(Poisson(λ)) / τm
+        @inbounds x[i] += ε0 * rand(Poisson(λ))
     end
 
     return x
