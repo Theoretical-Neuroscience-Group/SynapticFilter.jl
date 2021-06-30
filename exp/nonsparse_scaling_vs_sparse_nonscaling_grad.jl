@@ -23,7 +23,7 @@ blocksize = 8     # size of input block
 τblock    = 1.0   # duration of block activation
 
 # values for the number of blocks to iterate over
-numblock_rng = [1, 2, 3, 4, 6, 8, 16, 32, 64, 128, 256]
+numblock_rng = [1, 2, 3, 4, 6, 8, 11, 16, 23, 32, 45, 64, 91, 128, 181, 256]
 
 epoch      = ceil(Int, τ)                   # duration of one epoch
 num_epochs = parse.(Int, ARGS)[1]           # number of epochs to simulate 
