@@ -18,7 +18,8 @@ export
 include("filters.jl")
 export 
     FilterState,
-    BlockSF, DiagSF, FullSF
+    BlockSF, DiagSF, FullSF,
+    GradientRule
 
 include("simulation.jl")
 export 
