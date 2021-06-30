@@ -36,3 +36,5 @@ sim = Simulation(imodel, smodel, omodel, filter)
 
 ComputeMSE(sim; num_timesteps = 100000, timestep = 0.001, burnin = 10000)
 ```
+
+For more advanced use cases, please take a look at the [experiment subfolder](https://github.com/Theoretical-Neuroscience-Group/SynapticFilter.jl/tree/master/exp).
